@@ -1,24 +1,30 @@
-import type Phaser from "phaser";
-
-/** Returns a Phaser.Types.Core.GameConfig object.
- *  Scenes are injected at runtime so this stays scene-agnostic.
+/**
+ * phaser-config.ts
+ * ────────────────
+ * Phaser is browser-only and loaded via dynamic import.
+ * We receive the live namespace as a parameter so this file
+ * never imports Phaser at the top level (safe for SSR / Turbopack).
  */
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type PhaserNS = typeof import("phaser");
+
 export function buildPhaserConfig(
-  scenes: Phaser.Types.Scenes.SceneType[],
+  PH: PhaserNS,
+  scenes: PhaserNS["Scene"][],
   parent: string
-): Phaser.Types.Core.GameConfig {
+): ConstructorParameters<PhaserNS["Game"]>[0] {
   return {
-    type: Phaser.AUTO,
+    type: PH.AUTO,
     backgroundColor: "#000000",
     parent,
     scale: {
-      mode: Phaser.Scale.RESIZE,
-      autoCenter: Phaser.Scale.CENTER_BOTH,
+      mode: PH.Scale.RESIZE,
+      autoCenter: PH.Scale.CENTER_BOTH,
       width: "100%",
       height: "100%",
     },
     scene: scenes,
-    // No physics, audio, or plugins needed for intro phase
     audio: { noAudio: true },
     banner: false,
   };

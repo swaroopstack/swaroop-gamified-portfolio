@@ -1,0 +1,11 @@
+/*
+  globals.css — Tailwind v4
+  ─────────────────────────
+  v4 uses a single @import "tailwindcss" instead of the old
+  @tailwind base/components/utilities directives.
+  retro.css is imported first so our tokens and resets are
+  in place before Tailwind's preflight runs.
+*/
+
+@import "../styles/retro.css";
+@import "tailwindcss";
