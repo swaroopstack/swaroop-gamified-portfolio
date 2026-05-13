@@ -6,7 +6,6 @@
  * never imports Phaser at the top level (safe for SSR / Turbopack).
  */
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type PhaserNS = typeof import("phaser");
 
 export function buildPhaserConfig(

@@ -14,6 +14,7 @@ export default function TerminalScreen({ onStart }: TerminalScreenProps) {
   const [typedLines, setTypedLines] = useState<string[]>([]);
   const [showButton, setShowButton] = useState(false);
   const [fadeOut, setFadeOut]       = useState(false);
+  const [activeLineIdx, setActiveLineIdx] = useState(-1);
 
   const intervalRef  = useRef<ReturnType<typeof setInterval> | null>(null);
   const timeoutRef   = useRef<ReturnType<typeof setTimeout>  | null>(null);
@@ -21,6 +22,7 @@ export default function TerminalScreen({ onStart }: TerminalScreenProps) {
   const charIndexRef = useRef(0);
   const skippedRef   = useRef(false);
   const bottomRef    = useRef<HTMLDivElement>(null);
+  const typeNextCharRef = useRef<() => void>(() => undefined);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -50,17 +52,29 @@ export default function TerminalScreen({ onStart }: TerminalScreenProps) {
       const isLast = lineIdx === TERMINAL_LINES.length - 1;
 
       if (isLast) {
-        timeoutRef.current = setTimeout(() => setShowButton(true), 500);
+        timeoutRef.current = setTimeout(() => {
+          setActiveLineIdx(-1);
+          setShowButton(true);
+        }, 500);
       } else {
         timeoutRef.current = setTimeout(() => {
-          lineIndexRef.current += 1;
+          const nextLineIdx = lineIndexRef.current + 1;
+          lineIndexRef.current = nextLineIdx;
           charIndexRef.current  = 0;
+          setActiveLineIdx(nextLineIdx);
           setTypedLines((prev) => [...prev, ""]);
-          intervalRef.current = setInterval(typeNextChar, TYPING_SPEED_MS);
+          intervalRef.current = setInterval(
+            () => typeNextCharRef.current(),
+            TYPING_SPEED_MS
+          );
         }, 420);
       }
     }
   }, []);
+
+  useEffect(() => {
+    typeNextCharRef.current = typeNextChar;
+  }, [typeNextChar]);
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -70,7 +84,11 @@ export default function TerminalScreen({ onStart }: TerminalScreenProps) {
         lineIndexRef.current = 0;
         charIndexRef.current = 0;
         setTypedLines([""]);
-        intervalRef.current = setInterval(typeNextChar, TYPING_SPEED_MS);
+        setActiveLineIdx(0);
+        intervalRef.current = setInterval(
+          () => typeNextCharRef.current(),
+          TYPING_SPEED_MS
+        );
       }
 
       if (detail.type === "FADE_OUT") setFadeOut(true);
@@ -90,6 +108,7 @@ export default function TerminalScreen({ onStart }: TerminalScreenProps) {
     if (intervalRef.current) clearInterval(intervalRef.current);
     if (timeoutRef.current)  clearTimeout(timeoutRef.current);
     setTypedLines([...TERMINAL_LINES]);
+    setActiveLineIdx(-1);
     setShowButton(true);
   }, []);
 
@@ -99,8 +118,6 @@ export default function TerminalScreen({ onStart }: TerminalScreenProps) {
     scene?.triggerFadeOut();
     setTimeout(onStart, 440);
   }, [onStart]);
-
-  const activeLineIdx = showButton ? -1 : lineIndexRef.current;
 
   return (
     <>

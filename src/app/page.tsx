@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import { PHASER_PARENT_ID } from "@/game/index";
+import { PHASER_PARENT_ID } from "@/utils/constants";
 
 const TerminalScreen = dynamic(
   () => import("@/components/ui/TerminalScreen"),

@@ -1,3 +1,5 @@
+export const PHASER_PARENT_ID = "phaser-container";
+
 export const TERMINAL_PREFIX = "swaroop_os:~$";
 
 export const TERMINAL_LINES: string[] = [

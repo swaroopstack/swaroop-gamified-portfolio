@@ -6,19 +6,23 @@
  */
 
 import type * as PhaserTypes from "phaser";
+import { PHASER_PARENT_ID } from "@/utils/constants";
 import { buildPhaserConfig } from "./config/phaser-config";
-import BootScene from "./scenes/BootScene";
-import IntroScene from "./scenes/IntroScene";
-
-export const PHASER_PARENT_ID = "phaser-container";
 
 let gameInstance: PhaserTypes.Game | null = null;
 
 export async function initGame(): Promise<PhaserTypes.Game> {
   if (gameInstance) return gameInstance;
 
-  // Namespace import — Phaser ESM has no default export
-  const Phaser = await import("phaser");
+  // Namespace import — Phaser ESM has no default export.
+  // Scenes import Phaser at module scope, so load them only in the browser
+  // alongside the Phaser runtime instead of during Next.js prerendering.
+  const [Phaser, { default: BootScene }, { default: IntroScene }] =
+    await Promise.all([
+      import("phaser"),
+      import("./scenes/BootScene"),
+      import("./scenes/IntroScene"),
+    ]);
 
   const config = buildPhaserConfig(Phaser, [BootScene, IntroScene], PHASER_PARENT_ID);
   gameInstance = new Phaser.Game(config);
